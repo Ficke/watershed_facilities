@@ -44,10 +44,10 @@ const exampleData = [
 // Helper Components
 const StatusIcon = ({ status }) => {
     switch (status) {
-        case 'To do': return <Circle className="w-4 h-4 text-gray-400" />;
-        case 'Blocked': return <XCircle className="w-4 h-4 text-red-500 fill-red-100" />;
-        case 'Done': return <CheckCircle className="w-4 h-4 text-green-500" />;
-        default: return <Circle className="w-4 h-4 text-gray-400" />;
+        case 'To do': return <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />;
+        case 'Blocked': return <XCircle className="w-4 h-4 text-red-500 fill-red-100 flex-shrink-0" />;
+        case 'Done': return <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />;
+        default: return <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />;
     }
 };
 
@@ -65,7 +65,7 @@ const AssigneePill = ({ name }) => {
     }
     return (
         <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 font-semibold text-sm">
+            <div className="w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 font-semibold text-sm flex-shrink-0">
                 {name.charAt(0)}
             </div>
             <span>{name}</span>
@@ -76,7 +76,7 @@ const AssigneePill = ({ name }) => {
 
 // Main Components
 const Sidebar = ({ onNavigate }) => (
-    <div className="bg-[#0f172a] text-white w-64 flex-shrink-0 flex flex-col">
+    <div className="bg-[#0f172a] text-white w-64 flex-shrink-0 flex flex-col font-sans">
         <div className="p-4 border-b border-gray-700">
             <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center font-bold">W</div>
@@ -115,13 +115,13 @@ const Sidebar = ({ onNavigate }) => (
 );
 
 const TaskItem = ({ task, onNavigate }) => (
-    <div className="grid grid-cols-[auto,1fr,auto] items-center gap-x-4 py-2 px-4 hover:bg-gray-50 rounded-md">
+    <div className="flex items-center space-x-4 py-2 px-4 hover:bg-gray-50 rounded-md">
         <StatusIcon status={task.status} />
-        <a href="#" onClick={(e) => { e.preventDefault(); if (task.description.includes('Urjanet')) onNavigate('utilities_urjanet'); }} className="text-sm text-gray-800 hover:underline">
+        <a href="#" onClick={(e) => { e.preventDefault(); if (task.description.includes('Urjanet')) onNavigate('utilities_urjanet'); }} className="flex-grow text-sm text-gray-800 hover:underline truncate">
             {task.issue && <span className="text-red-600 mr-2">!</span>}
             {task.description}
         </a>
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
+        <div className="flex items-center space-x-2 text-sm text-gray-600 flex-shrink-0">
             <AssigneePill name={task.assignee} />
             <ChevronDown className="w-4 h-4" />
         </div>
@@ -132,16 +132,16 @@ const DatasetItem = ({ dataset, onNavigate }) => {
     const [isExpanded, setIsExpanded] = useState(dataset.tasks.length > 0);
 
     return (
-        <div className="border-b">
+        <div className="border-b last:border-b-0">
             <div 
                 className="flex items-center p-2 cursor-pointer"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                {isExpanded ? <ChevronDown className="w-5 h-5 text-gray-600" /> : <ChevronRight className="w-5 h-5 text-gray-600" />}
                 <span className="ml-2 font-medium text-gray-800">{dataset.name}</span>
             </div>
             {isExpanded && (
-                <div className="pb-2">
+                <div className="pb-2 pl-4 pr-2">
                     {dataset.tasks.map((task, index) => (
                         <TaskItem key={index} task={task} onNavigate={onNavigate} />
                     ))}
@@ -152,15 +152,15 @@ const DatasetItem = ({ dataset, onNavigate }) => {
 };
 
 const ActiveMeasurementScreen = ({ onNavigate }) => (
-    <div>
+    <div className="bg-white h-full">
         <div className="p-6 border-b">
             <h1 className="text-2xl font-semibold text-gray-900">2022 measurement</h1>
             <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center space-x-1">
-                    <button className="px-3 py-1.5 bg-white border rounded-md shadow-sm flex items-center space-x-2 text-sm">
+                    <button className="px-3 py-1.5 bg-white border rounded-md shadow-sm flex items-center space-x-2 text-sm font-medium">
                         <List className="w-4 h-4" /> <span>List</span>
                     </button>
-                    <button className="px-3 py-1.5 bg-gray-50 text-gray-600 border border-transparent rounded-md flex items-center space-x-2 text-sm hover:bg-gray-100">
+                    <button className="px-3 py-1.5 bg-gray-50 text-gray-600 border border-transparent rounded-md flex items-center space-x-2 text-sm font-medium hover:bg-gray-100">
                         <LayoutGrid className="w-4 h-4" /> <span>Board</span>
                     </button>
                 </div>
@@ -181,8 +181,8 @@ const ActiveMeasurementScreen = ({ onNavigate }) => (
             <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-semibold">Datasets</h2>
                 <div>
-                    <button className="text-sm text-blue-600 hover:underline px-2">Expand</button>
-                    <button className="text-sm text-blue-600 hover:underline px-2">Collapse</button>
+                    <button className="text-sm text-blue-600 hover:underline px-2 font-medium">Expand</button>
+                    <button className="text-sm text-blue-600 hover:underline px-2 font-medium">Collapse</button>
                 </div>
             </div>
             <div className="bg-white border rounded-lg">
@@ -193,7 +193,7 @@ const ActiveMeasurementScreen = ({ onNavigate }) => (
 );
 
 const UtilitiesUrjanetScreen = ({ onNavigate }) => (
-    <div className="p-6">
+    <div className="bg-white h-full p-6">
         <button onClick={() => onNavigate('active_measurement')} className="flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Active measurement
@@ -314,7 +314,7 @@ export default function App() {
     };
 
     return (
-        <div className="h-screen w-screen bg-gray-50 flex font-sans">
+        <div className="h-screen w-screen bg-gray-100 flex font-sans">
             <Sidebar onNavigate={handleNavigation} />
             <main className="flex-1 overflow-y-auto">
                 {renderPage()}
