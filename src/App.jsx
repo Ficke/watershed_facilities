@@ -1,8 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { Home, BarChart2, Briefcase, FileText, ShoppingCart, Settings, ChevronDown, ChevronRight, List, LayoutGrid, Circle, CheckCircle, XCircle, UploadCloud, X, File as FileIcon, LoaderCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Home, BarChart2, Briefcase, FileText, ShoppingCart, Settings, ChevronDown, ChevronRight, List, LayoutGrid, Circle, CheckCircle, XCircle, UploadCloud, X, File as FileIcon, LoaderCircle, AlertCircle } from 'lucide-react';
 
 // --- Mock Data ---
-// Full sidebar data for visual accuracy
 const sidebarNavItems = [
   { name: 'Home', icon: Home },
   { name: 'Measurements', icon: BarChart2, active: true, subItems: ['Active measurement'] },
@@ -12,7 +11,6 @@ const sidebarNavItems = [
   { name: 'Reporting', icon: FileText, subItems: ['Reports', 'Program summary'] },
 ];
 
-// Full dataset for visual accuracy, with updated status logic
 const initialDatasets = [
     { name: 'Capital expenses', tasks: [] },
     { name: 'Buildings', tasks: [] },
@@ -29,8 +27,8 @@ const initialDatasets = [
     { name: 'Cloud costs', tasks: [] },
     { name: 'Revenue', tasks: [] },
     { name: 'Upstream logistics', tasks: [] },
-    { 
-        name: 'Utilities', 
+    {
+        name: 'Utilities',
         tasks: [
             { id: 5, status: 'To do', description: 'Upload Utilities: Urjanet', assignee: 'Jane', isInteractive: true }
         ]
@@ -169,16 +167,35 @@ const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => (
     </div>
 );
 
-
-// --- New Upload Modal Component ---
+// --- Enhanced Upload Modal with Multi-file Drag & Drop ---
 const UploadModal = ({ onClose, onUploadComplete }) => {
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [uploadState, setUploadState] = useState('idle'); // 'idle', 'uploading', 'success'
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [uploadState, setUploadState] = useState('idle');
+    const [fileStatuses, setFileStatuses] = useState({});
+    const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
+    useEffect(() => {
+        if (selectedFiles.length > 0 && uploadState === 'idle') {
+            setUploadState('confirming');
+        } else if (selectedFiles.length === 0 && uploadState === 'confirming') {
+            setUploadState('idle');
+        }
+    }, [selectedFiles, uploadState]);
+
+
+    const handleFileSelect = (files) => {
+        const newFiles = Array.from(files).filter(file =>
+            (file.type === 'application/pdf' || file.type.startsWith('image/')) &&
+            !selectedFiles.some(f => f.name === file.name && f.size === file.size)
+        );
+        setSelectedFiles(prev => [...prev, ...newFiles]);
+    };
+
     const handleFileChange = (event) => {
-        if (event.target.files && event.target.files[0]) {
-            setSelectedFile(event.target.files[0]);
+        if (event.target.files) {
+            handleFileSelect(event.target.files);
+            event.target.value = null; // Reset for same file selection
         }
     };
 
@@ -186,56 +203,101 @@ const UploadModal = ({ onClose, onUploadComplete }) => {
         fileInputRef.current.click();
     };
 
+    const handleDragOver = (event) => {
+        event.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (event) => {
+        event.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (event) => {
+        event.preventDefault();
+        setIsDragging(false);
+        if (event.dataTransfer.files) {
+            handleFileSelect(event.dataTransfer.files);
+        }
+    };
+
+    const removeFile = (fileToRemove) => {
+        setSelectedFiles(prev => prev.filter(file => file !== fileToRemove));
+    };
+    
     const handleUpload = () => {
-        setUploadState('uploading');
-        // Simulate backend upload process
-        setTimeout(() => {
-            setUploadState('success');
-            // Wait for confirmation message to be seen, then close
-            setTimeout(() => {
-                onUploadComplete();
-                onClose();
-            }, 1500);
-        }, 1000);
+        setUploadState('processing');
+        const initialStatuses = selectedFiles.reduce((acc, file) => {
+            acc[file.name] = { progress: 0, status: 'processing' };
+            return acc;
+        }, {});
+        setFileStatuses(initialStatuses);
+    
+        const totalFiles = selectedFiles.length;
+        let filesProcessed = 0;
+    
+        selectedFiles.forEach(file => {
+            const interval = setInterval(() => {
+                setFileStatuses(prev => {
+                    const currentProgress = prev[file.name]?.progress ?? 0;
+                    if (currentProgress >= 100) {
+                        clearInterval(interval);
+                        
+                        const newStatus = 'success'; // Always succeed for the prototype
+                        
+                        if ((prev[file.name]?.status) !== 'success') {
+                            filesProcessed++;
+                        }
+                        
+                        if (filesProcessed === totalFiles) {
+                           setUploadState('processed');
+                           onUploadComplete();
+                        }
+                        
+                        return {
+                            ...prev,
+                            [file.name]: { ...prev[file.name], progress: 100, status: newStatus }
+                        };
+                    }
+                    return {
+                        ...prev,
+                        [file.name]: { ...prev[file.name], progress: (currentProgress + 10) }
+                    };
+                });
+            }, 100 + Math.random() * 200); // Varied speed
+        });
     };
 
     const renderContent = () => {
-        if (uploadState === 'uploading') {
-            return (
-                <div className="text-center p-8">
-                    <LoaderCircle className="w-12 h-12 text-blue-600 animate-spin mx-auto" />
-                    <p className="mt-4 text-gray-600">Uploading...</p>
-                </div>
-            );
-        }
+        const mainContentClasses = `flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg transition-colors ${
+            isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+        }`;
 
-        if (uploadState === 'success') {
-            return (
-                <div className="text-center p-8">
-                    <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
-                    <p className="mt-4 text-gray-600 font-medium">Your file has been uploaded.</p>
-                </div>
-            );
-        }
-
-        if (selectedFile) {
+        if (uploadState === 'processing' || uploadState === 'processed') {
             return (
                 <>
                     <div className="p-6">
-                        <div className="flex items-center p-4 border rounded-lg bg-gray-50">
-                            <FileIcon className="w-6 h-6 text-gray-500 mr-4 flex-shrink-0" />
-                            <div className="flex-grow min-w-0">
-                                <p className="text-sm font-medium text-gray-800 truncate">{selectedFile.name}</p>
-                                <p className="text-xs text-gray-500">{(selectedFile.size / 1024).toFixed(2)} KB</p>
-                            </div>
-                            <button onClick={() => setSelectedFile(null)} className="p-1 text-gray-400 hover:text-gray-600 ml-2 flex-shrink-0">
-                                <X className="w-4 h-4" />
-                            </button>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                            {uploadState === 'processing' ? 'Processing uploads...' : 'Finished uploads'}
+                        </h4>
+                        <div className="space-y-3">
+                            {selectedFiles.map(file => (
+                                <FileProgressItem 
+                                    key={file.name} 
+                                    file={file} 
+                                    progress={fileStatuses[file.name]?.progress ?? 0}
+                                    status={fileStatuses[file.name]?.status ?? 'processing'}
+                                />
+                            ))}
                         </div>
                     </div>
-                    <div className="bg-gray-50 px-6 py-4 flex justify-end">
-                        <button onClick={handleUpload} className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">
-                            Upload
+                    <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700 disabled:bg-blue-300"
+                            disabled={uploadState === 'processing'}
+                        >
+                            Done
                         </button>
                     </div>
                 </>
@@ -243,21 +305,45 @@ const UploadModal = ({ onClose, onUploadComplete }) => {
         }
 
         return (
-            <>
-                <div className="p-6 text-center">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-                        <UploadCloud className="h-6 w-6 text-blue-600" />
+             <div onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+                {selectedFiles.length > 0 && (
+                     <div className="p-6 max-h-60 overflow-y-auto">
+                        <div className="space-y-2">
+                             {selectedFiles.map((file) => (
+                                <div key={file.name} className="flex items-center p-2 border rounded-lg bg-gray-50">
+                                    <FileIcon className="w-5 h-5 text-gray-500 mr-3 flex-shrink-0" />
+                                    <div className="flex-grow min-w-0">
+                                        <p className="text-sm font-medium text-gray-800 truncate">{file.name}</p>
+                                        <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
+                                    </div>
+                                    <button onClick={() => removeFile(file)} className="p-1 text-gray-400 hover:text-gray-600 ml-2 flex-shrink-0">
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <p className="mt-4 text-gray-600">Please upload your utility statements.</p>
-                    <p className="text-xs text-gray-500 mt-1">PDF, JPG, or PNG files are accepted.</p>
-                </div>
+                )}
+                 <div className="p-4">
+                     <div className={mainContentClasses}>
+                         <UploadCloud className="h-8 w-8 text-gray-400" />
+                         <p className="mt-2 text-gray-600">
+                             Drag and drop files or{' '}
+                             <button onClick={handleBrowseClick} className="font-semibold text-blue-600 hover:underline">
+                                 browse
+                             </button>
+                         </p>
+                         <p className="text-xs text-gray-500 mt-1">PDF, JPG, or PNG files are accepted.</p>
+                     </div>
+                 </div>
+
                 <div className="bg-gray-50 px-6 py-4 flex justify-end">
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" />
-                    <button onClick={handleBrowseClick} className="px-4 py-2 bg-white border rounded-md shadow-sm text-sm font-semibold hover:bg-gray-50">
-                        Browse Local Files
+                    <button onClick={handleUpload} className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700" disabled={selectedFiles.length === 0}>
+                        {`Upload ${selectedFiles.length} file${selectedFiles.length === 1 ? '' : 's'}`}
                     </button>
                 </div>
-            </>
+                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" multiple />
+            </div>
         );
     };
 
@@ -276,6 +362,32 @@ const UploadModal = ({ onClose, onUploadComplete }) => {
     );
 };
 
+const FileProgressItem = ({ file, progress, status }) => {
+    const getStatusIcon = () => {
+        switch (status) {
+            case 'processing': return <LoaderCircle className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0" />;
+            case 'success': return <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />;
+            case 'error': return <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />;
+            default: return null;
+        }
+    };
+
+    return (
+        <div>
+            <div className="flex items-center space-x-3">
+                {getStatusIcon()}
+                <span className={`flex-grow text-sm truncate ${status === 'error' ? 'text-red-600' : 'text-gray-800'}`}>{file.name}</span>
+                {status === 'error' && <span className="text-sm text-red-600 flex-shrink-0">Could not read file</span>}
+            </div>
+             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1.5">
+                <div 
+                    className={`h-1.5 rounded-full transition-all duration-150 ${status === 'success' ? 'bg-green-500' : 'bg-blue-600'}`}
+                    style={{ width: `${progress}%` }}>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 // --- Main App Component ---
 export default function App() {
@@ -287,7 +399,7 @@ export default function App() {
             if (dataset.name === 'Utilities') {
                 return {
                     ...dataset,
-                    tasks: dataset.tasks.map(task => 
+                    tasks: dataset.tasks.map(task =>
                         task.isInteractive ? { ...task, status: 'Done' } : task
                     )
                 };
