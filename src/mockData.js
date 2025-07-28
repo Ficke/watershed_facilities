@@ -1,12 +1,10 @@
-import { Home, BarChart2, Briefcase, FileText, ShoppingCart, Settings } from 'lucide-react';
-
 export const sidebarNavItems = [
-  { name: 'Home', icon: Home, view: 'home' },
-  { name: 'Measurements', icon: BarChart2, subItems: [{ name: 'Active measurement', view: 'taskList' }] },
-  { name: 'Footprint', icon: Briefcase, subItems: [{ name: 'Overview', view: 'footprint' }, { name: 'Drilldown', view: null }, { name: 'Change log', view: null }] },
-  { name: 'Reduction plans', icon: FileText, subItems: ['All plans', '2022 Reduction Plan'] },
-  { name: 'Marketplace', icon: ShoppingCart, subItems: ['Explore', 'Clean power', 'Purchases'] },
-  { name: 'Reporting', icon: FileText, subItems: ['Reports', 'Program summary'] },
+  { name: 'Home', icon: 'Home', view: 'home' },
+  { name: 'Measurements', icon: 'BarChart2', subItems: [{ name: 'Active measurement', view: 'taskList' }] },
+  { name: 'Footprint', icon: 'Briefcase', subItems: [{ name: 'Overview', view: 'footprint' }, { name: 'Drilldown', view: null }, { name: 'Change log', view: null }] },
+  { name: 'Reduction plans', icon: 'FileText', subItems: ['All plans', '2022 Reduction Plan'] },
+  { name: 'Marketplace', icon: 'ShoppingCart', subItems: ['Explore', 'Clean power', 'Purchases'] },
+  { name: 'Reporting', icon: 'FileText', subItems: ['Reports', 'Program summary'] },
 ];
 
 export const initialDatasets = [
@@ -42,31 +40,31 @@ export const footprintData = {
   categories: ['Goods & Services', 'Offices', 'Marketing', 'Cloud', 'Employees', 'Travel'],
   colors: {
     'Goods & Services': '#1e3a8a',
-    'Offices': '#6ee7b7',
-    'Marketing': '#fde047',
+    'Offices': '#3b82f6',
+    'Marketing': '#60a5fa',
     'Cloud': '#93c5fd',
-    'Employees': '#fb923c',
-    'Travel': '#14b8a6',
+    'Employees': '#bfdbfe',
+    'Travel': '#dbeafe',
   },
   barData: [
-    [20, 30, 15, 25, 20, 35],
-    [22, 25, 20, 20, 15, 30],
-    [20, 30, 15, 25, 20, 25],
-    [18, 28, 18, 22, 18, 24],
-    [25, 35, 10, 15, 10, 30],
+    [50, 30, 15, 25, 20, 35],
+    [48, 25, 20, 20, 15, 30],
+    [45, 30, 15, 25, 20, 25],
+    [52, 28, 18, 22, 18, 24],
+    [55, 35, 10, 15, 10, 30],
   ],
   donutData: [
-      { category: 'Goods & Services', value: 20 },
-      { category: 'Offices', value: 25 },
-      { category: 'Marketing', value: 10 },
-      { category: 'Cloud', value: 20 },
-      { category: 'Employees', value: 15 },
-      { category: 'Travel', value: 10 },
+      { category: 'Goods & Services', value: 50 },
+      { category: 'Offices', value: 20 },
+      { category: 'Marketing', value: 8 },
+      { category: 'Cloud', value: 12 },
+      { category: 'Employees', value: 6 },
+      { category: 'Travel', value: 4 },
   ],
   goodsAndServicesBreakdown: [
       { name: 'Accounting & Legal', value: 97588 },
       { name: 'IT', value: 21739 },
       { name: 'Insurance', value: 10074 },
-      { name: 'Personnel Costs', value: 4094 },
+      { name: 'Personnel Costs', value: 47803 },
   ]
 };
