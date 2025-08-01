@@ -47,7 +47,9 @@ export const AssigneePill = ({ name }) => {
 // --- Screen Components ---
 
 export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
-    const [activeView, setActiveView] = useState('tasks'); // 'tasks' or 'timeline'
+    const [activeView, setActiveView] = useState('tasks'); // 'tasks', 'timeline', or 'conversations'
+    const [showConversationPanel, setShowConversationPanel] = useState(false);
+    const [conversations, setConversations] = useState([]); // Store conversations
 
     // Enhanced status badge component
     const StatusBadge = ({ status }) => {
@@ -142,9 +144,61 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
         );
     };
 
+    const ConversationsView = () => {
+        return (
+            <div className="bg-white h-full flex">
+                {/* Main conversations area */}
+                <div className="flex-1 p-6">
+                    {conversations.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No conversations yet</h3>
+                            <p className="text-sm text-gray-500 mb-6">Start a conversation to get help with your data or ask questions about your footprint.</p>
+                            <button
+                                onClick={() => setShowConversationPanel(true)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            >
+                                Ask a question
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {/* Future: List of conversations */}
+                            <p className="text-gray-500">Conversations will appear here...</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Ask a question button (always visible in top right) */}
+                <div className="absolute top-4 right-6">
+                    <button
+                        onClick={() => setShowConversationPanel(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
+                        Ask a question
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
     const TimelineView = () => {
         return (
-            <div className="bg-white h-full">
+            <div className="bg-white h-full relative">
+                {/* Ask a question button for Timeline view */}
+                <div className="absolute top-6 right-6 z-10">
+                    <button
+                        onClick={() => setShowConversationPanel(true)}
+                        className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
+                        Ask a question
+                    </button>
+                </div>
+                
                 <div className="p-6 max-w-6xl">
                     {/* Goal Banner */}
                     <div className="flex items-center mb-8 rounded-lg overflow-hidden border border-gray-200">
@@ -254,6 +308,76 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
         );
     };
 
+    const ConversationPanel = () => {
+        const [message, setMessage] = useState('');
+
+        const handleSendMessage = () => {
+            if (message.trim()) {
+                // Mock sending message (would integrate with backend)
+                console.log('Sending message:', message);
+                setMessage('');
+                setShowConversationPanel(false);
+                // Could add to conversations list here
+            }
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
+                <div className="bg-white w-96 h-full shadow-xl flex flex-col">
+                    {/* Header */}
+                    <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                        <h3 className="text-lg font-medium text-gray-900">Ask a question</h3>
+                        <button
+                            onClick={() => setShowConversationPanel(false)}
+                            className="p-1 rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 p-4 flex flex-col">
+                        <div className="flex-1 flex flex-col items-center justify-center text-center mb-6">
+                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                            </div>
+                            <p className="text-sm text-gray-500">
+                                Ask questions about your data, get help with measurements, or request guidance on your carbon footprint.
+                            </p>
+                        </div>
+
+                        {/* Message Input */}
+                        <div className="space-y-3">
+                            <textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder="Type your question here..."
+                                className="w-full h-24 p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && e.metaKey) {
+                                        handleSendMessage();
+                                    }
+                                }}
+                            />
+                            <div className="flex justify-between items-center">
+                                <p className="text-xs text-gray-400">Press ⌘+Enter to send</p>
+                                <button
+                                    onClick={handleSendMessage}
+                                    disabled={!message.trim()}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="bg-white h-full">
             {/* Tab Navigation */}
@@ -280,6 +404,16 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                         >
                             Tasks
                         </button>
+                        <button
+                            onClick={() => setActiveView('conversations')}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                                activeView === 'conversations'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            Conversations ({conversations.length})
+                        </button>
                     </div>
                 </div>
             </div>
@@ -287,6 +421,8 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
             {/* View Content */}
             {activeView === 'timeline' ? (
                 <TimelineView />
+            ) : activeView === 'conversations' ? (
+                <ConversationsView />
             ) : (
                 <div className="p-6">
                     {/* Tasks View Header */}
@@ -312,6 +448,12 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                             </div>
                         </div>
                         <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => setShowConversationPanel(true)}
+                                className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            >
+                                Ask a question
+                            </button>
                             <button className="text-sm text-blue-600 hover:text-blue-700">
                                 Notify assignees...
                             </button>
@@ -328,6 +470,9 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                     </div>
                 </div>
             )}
+            
+            {/* Conversation Panel */}
+            {showConversationPanel && <ConversationPanel />}
         </div>
     );
 }
