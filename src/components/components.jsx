@@ -49,7 +49,7 @@ export const AssigneePill = ({ name }) => {
 export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
     const [activeView, setActiveView] = useState('tasks'); // 'tasks', 'timeline', or 'conversations'
     const [showConversationPanel, setShowConversationPanel] = useState(false);
-    const [conversations, setConversations] = useState([]); // Store conversations
+    const [conversations] = useState([]); // Store conversations
 
     // Enhanced status badge component
     const StatusBadge = ({ status }) => {
@@ -102,16 +102,22 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                     {task.hasStartButton ? (
                         <button 
                             onClick={onUploadClick}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
                         >
-                            Start →
+                            <span>Start</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                         </button>
                     ) : task.hasRespondButton ? (
                         <button 
                             onClick={() => console.log('Respond clicked')}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
                         >
-                            Respond →
+                            <span>Respond</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                         </button>
                     ) : (
                         <span className="text-sm text-gray-500">-</span>
@@ -428,10 +434,10 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                     {/* Tasks View Header */}
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4">
-                            <button className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                            <button className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
                                 <span>List</span>
                             </button>
-                            <button className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
+                            <button className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
                                 <span>Board</span>
                             </button>
                             <div className="flex items-center space-x-2 text-sm text-gray-500">
@@ -543,7 +549,7 @@ export const UploadScreen = ({ onFilesUploaded }) => {
     );
 };
 
-export const UploadResultsScreen = ({ uploadedFiles, onContinue }) => {
+export const UploadResultsScreen = ({ uploadedFiles }) => {
     const successfulFiles = uploadedFiles.filter(f => !f.needsReview);
     const reviewFiles = uploadedFiles.filter(f => f.needsReview);
     
@@ -907,7 +913,7 @@ const UtilityBillPlaceholder = () => (
     </div>
 );
 
-const CalendarHeader = ({ viewDate, setViewDate, setIsSelectingMonth, setIsSelectingYear, months, years }) => (
+const CalendarHeader = ({ viewDate, setViewDate, setIsSelectingMonth, setIsSelectingYear, months }) => (
     <div className="flex justify-between items-center mb-2 px-2">
         <button onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))} className="p-1 rounded-full hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
             <ChevronLeft className="w-5 h-5" />
@@ -1049,7 +1055,6 @@ export const ValidationScreen = ({ onValidationComplete }) => {
         }
     ];
 
-    const currentBill = billsToReview[step];
     
     const handleConfirm = () => {
         if (step < billsToReview.length - 1) {

@@ -2,7 +2,7 @@ export const sidebarNavItems = [
   { name: 'Home', icon: 'Home', view: 'home' },
   { name: 'Measurements', icon: 'BarChart2', subItems: [{ name: 'Active measurement', view: 'taskList' }] },
   { name: 'Footprint', icon: 'Briefcase', subItems: [{ name: 'Overview', view: 'footprint' }, { name: 'Drilldown', view: null }, { name: 'Change log', view: null }] },
-  { name: 'Reduction plans', icon: 'FileText', subItems: ['All plans', '2022 Reduction Plan'] },
+  { name: 'Reduction plans', icon: 'FileText', subItems: ['All plans', '2025 Reduction Plan'] },
   { name: 'Marketplace', icon: 'ShoppingCart', subItems: ['Explore', 'Clean power', 'Purchases'] },
   { name: 'Reporting', icon: 'FileText', subItems: ['Reports', 'Program summary'] },
 ];
@@ -37,7 +37,7 @@ export const initialDatasets = [
 ];
 
 export const footprintData = {
-  labels: ['Jul', 'Oct', '2023', 'Apr', 'Jul'],
+  labels: ['2021', '2022', '2023', '2024', '2025'],
   categories: ['Goods & Services', 'Offices', 'Marketing', 'Cloud', 'Employees', 'Travel'],
   colors: {
     'Goods & Services': '#1e3a8a',
@@ -48,11 +48,11 @@ export const footprintData = {
     'Travel': '#dbeafe',
   },
   barData: [
-    [50, 30, 15, 25, 20, 35],
-    [48, 25, 20, 20, 15, 30],
-    [45, 30, 15, 25, 20, 25],
-    [52, 28, 18, 22, 18, 24],
-    [55, 35, 10, 15, 10, 30],
+    [240, 50, 20, 36, 24, 40], // 2021 - 410k total
+    [180, 60, 24, 30, 30, 36], // 2022 - 360k total  
+    [200, 70, 16, 40, 20, 44], // 2023 - 390k total
+    [170, 40, 30, 24, 16, 30], // 2024 - 310k total
+    [196, 42, 20, 44, 28, 24], // 2025 - 354k total (177k G&S × 2)
   ],
   donutData: [
       { category: 'Goods & Services', value: 50 },
