@@ -8,31 +8,32 @@ export const sidebarNavItems = [
 ];
 
 export const initialDatasets = [
-    { name: 'Capital expenses', tasks: [] },
-    { name: 'Buildings', tasks: [] },
-    { name: 'Cloud usage', tasks: [] },
-    { name: 'Cost of revenue', tasks: [] },
+    { name: 'Capital expenses', tasks: [], statusBadge: 'Needs mapping' },
+    { name: 'Buildings', tasks: [], statusBadge: 'Needs response' },
+    { name: 'Cloud usage', tasks: [], statusBadge: 'Needs response' },
+    { name: 'Cost of revenue', tasks: [], statusBadge: 'Needs response' },
     { name: 'Flights', tasks: [
-        { id: 1, status: 'To do', description: 'Upload Flights', assignee: 'Unassigned' },
-        { id: 2, status: 'To do', description: 'Upload Flights: TripActions', assignee: 'Madeline Pickering' },
+        { id: 1, status: 'To do', description: 'Upload Flights', assignee: 'Unassigned', hasStartButton: true },
+        { id: 2, status: 'To do', description: 'Upload Flights: TripActions', assignee: 'Madeline Pickering', hasRespondButton: true },
         { id: 3, status: 'Blocked', description: 'Process Flights', assignee: 'Watershed expert' },
-        { id: 4, status: 'To do', description: 'There is an issue here', assignee: 'Madeline Pickering', issue: true },
-    ]},
-    { name: 'Hotels', tasks: [] },
-    { name: 'Card production', tasks: [] },
-    { name: 'Cloud costs', tasks: [] },
-    { name: 'Revenue', tasks: [] },
-    { name: 'Upstream logistics', tasks: [] },
+        { id: 4, status: 'To do', description: 'There is an issue here', assignee: 'Madeline Pickering', issue: true, hasRespondButton: true },
+    ], statusBadge: 'Needs response'},
+    { name: 'Hotels', tasks: [], statusBadge: 'Needs response' },
+    { name: 'Card production', tasks: [], statusBadge: 'Needs upload' },
+    { name: 'Cloud costs', tasks: [], statusBadge: 'Needs upload' },
+    { name: 'Revenue', tasks: [], statusBadge: 'Needs upload' },
+    { name: 'Upstream logistics', tasks: [], statusBadge: 'Needs upload' },
     {
         name: 'Utilities',
         tasks: [
-            { id: 5, status: 'To do', description: 'Upload Utilities', assignee: 'Jane', isInteractive: true }
-        ]
+            { id: 5, status: 'To do', description: 'Upload Utilities', assignee: 'Jane', isInteractive: true, hasStartButton: true }
+        ],
+        statusBadge: 'Needs upload'
     },
-    { name: 'Chart of accounts', tasks: [] },
-    { name: 'Employees', tasks: [] },
-    { name: 'Operating expenses', tasks: [] },
-    { name: 'Downstream logistics', tasks: [] },
+    { name: 'Chart of accounts', tasks: [], statusBadge: 'Processing' },
+    { name: 'Employees', tasks: [], statusBadge: 'Processing' },
+    { name: 'Operating expenses', tasks: [], statusBadge: 'Processing' },
+    { name: 'Downstream logistics', tasks: [], statusBadge: 'Ready for footprint' },
 ];
 
 export const footprintData = {
