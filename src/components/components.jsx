@@ -47,20 +47,46 @@ export const AssigneePill = ({ name }) => {
 // --- Screen Components ---
 
 export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
+    const [activeView, setActiveView] = useState('tasks'); // 'tasks' or 'timeline'
+
+    // Enhanced status badge component
+    const StatusBadge = ({ status }) => {
+        const getBadgeStyle = (status) => {
+            switch (status) {
+                case 'Needs response':
+                    return 'bg-red-50 text-red-700 border-red-200';
+                case 'Needs upload':
+                    return 'bg-orange-50 text-orange-700 border-orange-200';
+                case 'Processing':
+                    return 'bg-blue-50 text-blue-700 border-blue-200';
+                case 'Ready for footprint':
+                    return 'bg-green-50 text-green-700 border-green-200';
+                default:
+                    return 'bg-gray-50 text-gray-700 border-gray-200';
+            }
+        };
+
+        return (
+            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getBadgeStyle(status)}`}>
+                {status}
+            </span>
+        );
+    };
+
     const TaskItem = ({ task, onUploadClick }) => {
         const isInteractive = task.isInteractive;
-        const itemClasses = `flex items-center space-x-4 py-2 px-4 rounded-md ${isInteractive ? 'hover:bg-gray-50 cursor-pointer' : ''}`;
+        const itemClasses = `flex items-center space-x-4 py-3 px-4 hover:bg-gray-50 ${isInteractive ? 'cursor-pointer' : ''}`;
 
         return (
             <div className={itemClasses} onClick={isInteractive ? onUploadClick : undefined}>
                 <StatusIcon status={task.status} />
-                <span className="flex-grow text-sm text-gray-800 truncate">
+                <span className="flex-grow text-sm text-gray-900">
                     {task.issue && <span className="text-red-600 mr-2">!</span>}
                     {task.description}
                 </span>
-                <div className="flex items-center space-x-2 text-sm text-gray-600 flex-shrink-0">
+                <div className="flex items-center space-x-3 flex-shrink-0">
+                    {task.statusBadge && <StatusBadge status={task.statusBadge} />}
                     <AssigneePill name={task.assignee} />
-                    <ChevronDown className="w-4 h-4" />
                 </div>
             </div>
         );
@@ -71,12 +97,15 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
 
         return (
             <div className="border-b last:border-b-0">
-                <div className="flex items-center p-2 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-                    {isExpanded ? <ChevronDown className="w-5 h-5 text-gray-600" /> : <ChevronRight className="w-5 h-5 text-gray-600" />}
-                    <span className="ml-2 font-medium text-gray-800">{dataset.name}</span>
+                <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50" onClick={() => setIsExpanded(!isExpanded)}>
+                    <div className="flex items-center">
+                        {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-500 mr-3" /> : <ChevronRight className="w-4 h-4 text-gray-500 mr-3" />}
+                        <span className="font-medium text-gray-900 text-sm">{dataset.name}</span>
+                    </div>
+                    {dataset.statusBadge && <StatusBadge status={dataset.statusBadge} />}
                 </div>
                 {isExpanded && (
-                    <div className="pb-2 pl-4 pr-2">
+                    <div className="bg-gray-50">
                         {dataset.tasks.map((task) => (
                             <TaskItem key={task.id} task={task} onUploadClick={onUploadClick} />
                         ))}
@@ -86,14 +115,125 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
         );
     };
 
-    return (
-        <div className="bg-white h-full">
-            <div className="p-6">
-                <h2 className="text-lg font-semibold mb-2">Datasets</h2>
-                <div className="bg-white border rounded-lg">
-                    {datasets.map(d => <DatasetItem key={d.name} dataset={d} onUploadClick={onUploadClick} />)}
+    const TimelineView = () => {
+        return (
+            <div className="bg-white h-full">
+                <div className="p-6">
+                    {/* Goal Banner */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <div className="text-sm text-green-700">
+                                    You're on track to meet your Apr 30 target.
+                                </div>
+                            </div>
+                            <button className="text-green-700 text-sm font-medium hover:text-green-800">
+                                See focus →
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Timeline Content */}
+                    <div className="space-y-6">
+                        <div className="flex items-start space-x-4">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            </div>
+                            <div className="flex-1">
+                                <div className="bg-blue-50 rounded-lg p-4 mb-2">
+                                    <h3 className="font-medium text-gray-900 mb-1">Data collection</h3>
+                                    <p className="text-sm text-gray-600">On track</p>
+                                </div>
+                                <div className="bg-blue-100 rounded-lg p-4 mb-2">
+                                    <h3 className="font-medium text-gray-900 mb-1">Data review & processing</h3>
+                                    <p className="text-sm text-gray-600">Watershed is processing your data</p>
+                                </div>
+                                <div className="bg-gray-100 rounded-lg p-4">
+                                    <h3 className="font-medium text-gray-900 mb-1">Footprint review</h3>
+                                    <p className="text-sm text-gray-600">Not started</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        );
+    };
+
+    return (
+        <div className="bg-white h-full">
+            {/* Tab Navigation */}
+            <div className="border-b border-gray-200">
+                <div className="px-6">
+                    <div className="flex space-x-8">
+                        <button
+                            onClick={() => setActiveView('timeline')}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                                activeView === 'timeline'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            Timeline
+                        </button>
+                        <button
+                            onClick={() => setActiveView('tasks')}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                                activeView === 'tasks'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            Tasks
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* View Content */}
+            {activeView === 'timeline' ? (
+                <TimelineView />
+            ) : (
+                <div className="p-6">
+                    {/* Tasks View Header */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                            <button className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                                <span>List</span>
+                            </button>
+                            <button className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
+                                <span>Board</span>
+                            </button>
+                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                <span>By dataset</span>
+                                <ChevronDown className="w-4 h-4" />
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                <span>All datasets</span>
+                                <ChevronDown className="w-4 h-4" />
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                <span>All assignees</span>
+                                <ChevronDown className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <button className="text-sm text-blue-600 hover:text-blue-700">
+                                Notify assignees...
+                            </button>
+                            <button className="text-sm text-gray-500 hover:text-gray-700">
+                                Manage sources
+                                <ChevronDown className="w-4 h-4 inline ml-1" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Datasets List */}
+                    <div className="bg-white border border-gray-200 rounded-lg">
+                        {datasets.map(d => <DatasetItem key={d.name} dataset={d} onUploadClick={onUploadClick} />)}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
