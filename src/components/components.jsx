@@ -118,14 +118,12 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
     const TimelineView = () => {
         return (
             <div className="bg-white h-full">
-                <div className="p-6">
+                <div className="p-6 max-w-4xl">
                     {/* Goal Banner */}
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                                <div className="text-sm text-green-700">
-                                    You're on track to meet your Apr 30 target.
-                                </div>
+                            <div className="text-sm text-green-700">
+                                Your goal is to understand the biggest emitters in your footprint
                             </div>
                             <button className="text-green-700 text-sm font-medium hover:text-green-800">
                                 See focus →
@@ -133,24 +131,60 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                         </div>
                     </div>
 
-                    {/* Timeline Content */}
-                    <div className="space-y-6">
-                        <div className="flex items-start space-x-4">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    {/* Timeline with dates */}
+                    <div className="relative">
+                        {/* Timeline header with months */}
+                        <div className="flex justify-between text-sm text-gray-500 mb-4 px-4">
+                            <span>Mar</span>
+                            <span>Apr</span>
+                            <span>May</span>
+                        </div>
+                        
+                        {/* Timeline bar with target marker */}
+                        <div className="relative mb-8">
+                            <div className="h-2 bg-gray-200 rounded-full">
+                                <div className="h-2 bg-blue-500 rounded-full" style={{width: '60%'}}></div>
                             </div>
-                            <div className="flex-1">
-                                <div className="bg-blue-50 rounded-lg p-4 mb-2">
-                                    <h3 className="font-medium text-gray-900 mb-1">Data collection</h3>
-                                    <p className="text-sm text-gray-600">On track</p>
+                            {/* Target marker */}
+                            <div className="absolute right-0 top-0 transform translate-x-1/2">
+                                <div className="w-4 h-4 bg-white border-2 border-blue-500 rounded-full"></div>
+                                <div className="absolute -top-6 -left-8 text-xs text-gray-600">Target</div>
+                            </div>
+                        </div>
+
+                        {/* Timeline steps */}
+                        <div className="space-y-6">
+                            {/* Data collection - Active */}
+                            <div className="flex items-start space-x-4">
+                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
                                 </div>
-                                <div className="bg-blue-100 rounded-lg p-4 mb-2">
-                                    <h3 className="font-medium text-gray-900 mb-1">Data review & processing</h3>
-                                    <p className="text-sm text-gray-600">Watershed is processing your data</p>
+                                <div className="flex-1">
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <h3 className="font-medium text-gray-900 mb-1">Data collection</h3>
+                                        <p className="text-sm text-gray-600 mb-2">On track</p>
+                                        
+                                        {/* Sub-step */}
+                                        <div className="ml-4 mt-3">
+                                            <div className="bg-blue-100 border border-blue-200 rounded-lg p-3">
+                                                <h4 className="font-medium text-gray-900 mb-1">Data review & processing</h4>
+                                                <p className="text-sm text-gray-600">Watershed is processing your data</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="bg-gray-100 rounded-lg p-4">
-                                    <h3 className="font-medium text-gray-900 mb-1">Footprint review</h3>
-                                    <p className="text-sm text-gray-600">Not started</p>
+                            </div>
+
+                            {/* Footprint review - Not started */}
+                            <div className="flex items-start space-x-4">
+                                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                                <div className="flex-1">
+                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                        <h3 className="font-medium text-gray-900 mb-1">Footprint review</h3>
+                                        <p className="text-sm text-gray-600">Not started</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
