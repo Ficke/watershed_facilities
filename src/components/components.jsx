@@ -47,7 +47,10 @@ export const AssigneePill = ({ name }) => {
 // --- Screen Components ---
 
 export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
-    const [activeView, setActiveView] = useState('tasks'); // 'tasks' or 'timeline'
+    const [activeView, setActiveView] = useState('tasks'); // 'tasks', 'timeline', or 'conversations'
+    const [showHelpModal, setShowHelpModal] = useState(false);
+    const [conversations] = useState([]); // Store conversations
+    const [hasInteractedWithUpload, setHasInteractedWithUpload] = useState(false); // Track if user has interacted with upload
 
     // Enhanced status badge component
     const StatusBadge = ({ status }) => {
@@ -77,8 +80,13 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
         const isInteractive = task.isInteractive;
         const itemClasses = `flex items-center py-3 px-4 hover:bg-gray-50 ${isInteractive ? 'cursor-pointer' : ''}`;
 
+        const handleUploadClick = () => {
+            setHasInteractedWithUpload(true);
+            if (onUploadClick) onUploadClick();
+        };
+
         return (
-            <div className={itemClasses} onClick={isInteractive && !task.hasStartButton ? onUploadClick : undefined}>
+            <div className={itemClasses} onClick={isInteractive && !task.hasStartButton ? handleUploadClick : undefined}>
                 {/* Status Icon */}
                 <div className="w-6 flex justify-center mr-4">
                     <StatusIcon status={task.status} />
@@ -99,17 +107,23 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                 <div className="flex-shrink-0 w-24 flex justify-end">
                     {task.hasStartButton ? (
                         <button 
-                            onClick={onUploadClick}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                            onClick={handleUploadClick}
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
                         >
-                            Start →
+                            <span>Start</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                         </button>
                     ) : task.hasRespondButton ? (
                         <button 
                             onClick={() => console.log('Respond clicked')}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
                         >
-                            Respond →
+                            <span>Respond</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                         </button>
                     ) : (
                         <span className="text-sm text-gray-500">-</span>
@@ -142,9 +156,61 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
         );
     };
 
+    const ConversationsView = () => {
+        return (
+            <div className="bg-white h-full flex">
+                {/* Main conversations area */}
+                <div className="flex-1 p-6">
+                    {conversations.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No conversations yet</h3>
+                            <p className="text-sm text-gray-500 mb-6">Start a conversation to get help with your data or ask questions about your footprint.</p>
+                            <button
+                                onClick={() => setShowHelpModal(true)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            >
+                                Ask a question
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {/* Future: List of conversations */}
+                            <p className="text-gray-500">Conversations will appear here...</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Ask a question button (always visible in top right) */}
+                <div className="absolute top-4 right-6">
+                    <button
+                        onClick={() => setShowHelpModal(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
+                        Ask a question
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
     const TimelineView = () => {
         return (
-            <div className="bg-white h-full">
+            <div className="bg-white h-full relative">
+                {/* Ask a question button for Timeline view */}
+                <div className="absolute top-6 right-6 z-10">
+                    <button
+                        onClick={() => setShowHelpModal(true)}
+                        className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
+                        Ask a question
+                    </button>
+                </div>
+                
                 <div className="p-6 max-w-6xl">
                     {/* Goal Banner */}
                     <div className="flex items-center mb-8 rounded-lg overflow-hidden border border-gray-200">
@@ -254,6 +320,81 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
         );
     };
 
+    const HelpModal = () => {
+        const [selectedProblem, setSelectedProblem] = useState('I don\'t know what data is required');
+        const [message, setMessage] = useState('');
+
+        const problemOptions = [
+            'I don\'t know what data is required',
+            'I have issues uploading files',
+            'I have questions about my footprint',
+            'Other'
+        ];
+
+        const handleSubmit = () => {
+            if (message.trim()) {
+                console.log('Sending help request:', { problem: selectedProblem, message });
+                setMessage('');
+                setShowHelpModal(false);
+            }
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                    <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-900">Need help?</h3>
+                        <button
+                            onClick={() => setShowHelpModal(false)}
+                            className="p-1 rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="p-6">
+                        <div className="mb-6">
+                            <h4 className="text-base font-medium text-gray-900 mb-4">Send us a message</h4>
+                            <div className="mb-4">
+                                <label className="block text-sm text-gray-600 mb-2">
+                                    What kind of problem are you having? *
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        value={selectedProblem}
+                                        onChange={(e) => setSelectedProblem(e.target.value)}
+                                        className="w-full p-3 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                                    >
+                                        {problemOptions.map((option) => (
+                                            <option key={option} value={option}>{option}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                </div>
+                            </div>
+                            <div className="mb-6">
+                                <label className="block text-sm text-gray-600 mb-2">
+                                    Explain your problem:
+                                </label>
+                                <textarea
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    placeholder=""
+                                    className="w-full h-24 p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <button
+                                onClick={handleSubmit}
+                                className="w-full px-4 py-3 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="bg-white h-full">
             {/* Tab Navigation */}
@@ -280,6 +421,18 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                         >
                             Tasks
                         </button>
+                        {hasInteractedWithUpload && (
+                            <button
+                                onClick={() => setActiveView('conversations')}
+                                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                                    activeView === 'conversations'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                Conversations ({conversations.length})
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -287,15 +440,17 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
             {/* View Content */}
             {activeView === 'timeline' ? (
                 <TimelineView />
+            ) : activeView === 'conversations' ? (
+                <ConversationsView />
             ) : (
                 <div className="p-6">
                     {/* Tasks View Header */}
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4">
-                            <button className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                            <button className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
                                 <span>List</span>
                             </button>
-                            <button className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
+                            <button className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
                                 <span>Board</span>
                             </button>
                             <div className="flex items-center space-x-2 text-sm text-gray-500">
@@ -312,6 +467,14 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                             </div>
                         </div>
                         <div className="flex items-center space-x-2">
+                            {hasInteractedWithUpload && (
+                                <button
+                                    onClick={() => setShowHelpModal(true)}
+                                    className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                >
+                                    Ask a question
+                                </button>
+                            )}
                             <button className="text-sm text-blue-600 hover:text-blue-700">
                                 Notify assignees...
                             </button>
@@ -328,6 +491,9 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
                     </div>
                 </div>
             )}
+            
+            {/* Conversation Panel */}
+            {showHelpModal && <HelpModal />}
         </div>
     );
 }
@@ -335,6 +501,7 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
 export const UploadScreen = ({ onFilesUploaded }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [showHelpModal, setShowHelpModal] = useState(false);
     const fileInputRef = useRef(null);
 
     const handleFileSelect = (files) => {
@@ -369,8 +536,90 @@ export const UploadScreen = ({ onFilesUploaded }) => {
         }
     };
 
+    const HelpModal = () => {
+        const [selectedProblem, setSelectedProblem] = useState('I don\'t know what data is required');
+        const [message, setMessage] = useState('');
+
+        const problemOptions = [
+            'I don\'t know what data is required',
+            'I have issues uploading files',
+            'Other'
+        ];
+
+        const handleSubmit = () => {
+            if (message.trim()) {
+                console.log('Sending help request:', { problem: selectedProblem, message });
+                setMessage('');
+                setShowHelpModal(false);
+            }
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                    <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-900">Need help?</h3>
+                        <button
+                            onClick={() => setShowHelpModal(false)}
+                            className="p-1 rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="p-6">
+                        <h4 className="text-base font-medium text-gray-900 mb-4">Send us a message</h4>
+                        <div className="mb-4">
+                            <label className="block text-sm text-gray-600 mb-2">
+                                What kind of problem are you having? *
+                            </label>
+                            <div className="relative">
+                                <select
+                                    value={selectedProblem}
+                                    onChange={(e) => setSelectedProblem(e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                                >
+                                    {problemOptions.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
+                        </div>
+                        <div className="mb-6">
+                            <label className="block text-sm text-gray-600 mb-2">
+                                Explain your problem:
+                            </label>
+                            <textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder=""
+                                className="w-full h-24 p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                        <button
+                            onClick={handleSubmit}
+                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="bg-white h-full flex flex-col">
+        <div className="bg-white h-full flex flex-col relative">
+            {/* Ask a question button - positioned in top right */}
+            <div className="absolute top-6 right-6 z-10">
+                <button
+                    onClick={() => setShowHelpModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-lg"
+                >
+                    Ask a question
+                </button>
+            </div>
+            
             <div className="flex-1 p-8 flex flex-col items-center justify-center" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
                 {isProcessing ? (
                     <div className="flex flex-col items-center">
@@ -394,16 +643,102 @@ export const UploadScreen = ({ onFilesUploaded }) => {
                     </div>
                 )}
             </div>
+            
+            {/* Help Modal */}
+            {showHelpModal && <HelpModal />}
         </div>
     );
 };
 
-export const UploadResultsScreen = ({ uploadedFiles, onContinue }) => {
+export const UploadResultsScreen = ({ uploadedFiles }) => {
+    const [showHelpModal, setShowHelpModal] = useState(false);
     const successfulFiles = uploadedFiles.filter(f => !f.needsReview);
     const reviewFiles = uploadedFiles.filter(f => f.needsReview);
     
+    const HelpModal = () => {
+        const [selectedProblem, setSelectedProblem] = useState('Files were not processed correctly');
+        const [message, setMessage] = useState('');
+
+        const problemOptions = [
+            'Files were not processed correctly',
+            'I have questions about the results',
+            'Other'
+        ];
+
+        const handleSubmit = () => {
+            if (message.trim()) {
+                console.log('Sending help request:', { problem: selectedProblem, message });
+                setMessage('');
+                setShowHelpModal(false);
+            }
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                    <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-900">Need help?</h3>
+                        <button
+                            onClick={() => setShowHelpModal(false)}
+                            className="p-1 rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="p-6">
+                        <h4 className="text-base font-medium text-gray-900 mb-4">Send us a message</h4>
+                        <div className="mb-4">
+                            <label className="block text-sm text-gray-600 mb-2">
+                                What kind of problem are you having? *
+                            </label>
+                            <div className="relative">
+                                <select
+                                    value={selectedProblem}
+                                    onChange={(e) => setSelectedProblem(e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                                >
+                                    {problemOptions.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
+                        </div>
+                        <div className="mb-6">
+                            <label className="block text-sm text-gray-600 mb-2">
+                                Explain your problem:
+                            </label>
+                            <textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder=""
+                                className="w-full h-24 p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                        <button
+                            onClick={handleSubmit}
+                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="bg-white h-full flex flex-col">            
+        <div className="bg-white h-full flex flex-col relative">            
+            {/* Ask a question button - positioned in top right */}
+            <div className="absolute top-6 right-6 z-10">
+                <button
+                    onClick={() => setShowHelpModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-lg"
+                >
+                    Ask a question
+                </button>
+            </div>
+            
             <div className="flex-1 p-8">
                 <div className="max-w-4xl mx-auto h-full flex flex-col">
                     <div className="mb-6">
@@ -485,7 +820,9 @@ export const UploadResultsScreen = ({ uploadedFiles, onContinue }) => {
                     </div>
                 </div>
             </div>
-
+            
+            {/* Help Modal */}
+            {showHelpModal && <HelpModal />}
         </div>
     );
 };
@@ -656,7 +993,7 @@ const ExpandableRow = ({ category, value, children }) => {
 export const FootprintScreen = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [hovered, setHovered] = useState(null);
-    const maxVal = 120;
+    const maxVal = 450; // Updated to accommodate ~410k max value
     const totalGoodsAndServices = footprintData.goodsAndServicesBreakdown.reduce((sum, item) => sum + item.value, 0);
     
     const handleCategoryClick = (category) => {
@@ -697,8 +1034,10 @@ export const FootprintScreen = () => {
                         <h2 className="text-lg font-semibold mb-4">Gross emissions over time</h2>
                         <div className="flex">
                             <div className="flex flex-col justify-between text-right text-sm text-gray-500 pr-4" style={{ height: '200px' }}>
-                               <span>{maxVal}</span>
-                               <span>{maxVal * 0.5}</span>
+                               <span>{maxVal}k</span>
+                               <span>{Math.round(maxVal * 0.75)}k</span>
+                               <span>{Math.round(maxVal * 0.5)}k</span>
+                               <span>{Math.round(maxVal * 0.25)}k</span>
                                <span>0</span>
                             </div>
                             <div className="flex-1 grid grid-cols-5 gap-4 border-l border-gray-200 pl-4" style={{ height: '200px' }}>
@@ -762,7 +1101,7 @@ const UtilityBillPlaceholder = () => (
     </div>
 );
 
-const CalendarHeader = ({ viewDate, setViewDate, setIsSelectingMonth, setIsSelectingYear, months, years }) => (
+const CalendarHeader = ({ viewDate, setViewDate, setIsSelectingMonth, setIsSelectingYear, months }) => (
     <div className="flex justify-between items-center mb-2 px-2">
         <button onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))} className="p-1 rounded-full hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
             <ChevronLeft className="w-5 h-5" />
@@ -886,6 +1225,7 @@ export const ValidationScreen = ({ onValidationComplete }) => {
     const [kwhValue, setKwhValue] = useState("15,220");
     const [dateValue, setDateValue] = useState("2025/07/31");
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [showHelpModal, setShowHelpModal] = useState(false);
 
     const billsToReview = [
         {
@@ -904,7 +1244,6 @@ export const ValidationScreen = ({ onValidationComplete }) => {
         }
     ];
 
-    const currentBill = billsToReview[step];
     
     const handleConfirm = () => {
         if (step < billsToReview.length - 1) {
@@ -912,8 +1251,91 @@ export const ValidationScreen = ({ onValidationComplete }) => {
         }
     };
 
+    const HelpModal = () => {
+        const [selectedProblem, setSelectedProblem] = useState('I don\'t know what data is required');
+        const [message, setMessage] = useState('');
+
+        const problemOptions = [
+            'The extracted data looks incorrect',
+            'I\'m not sure how to correct the values',
+            'I have questions about validation',
+            'Other'
+        ];
+
+        const handleSubmit = () => {
+            if (message.trim()) {
+                console.log('Sending help request:', { problem: selectedProblem, message });
+                setMessage('');
+                setShowHelpModal(false);
+            }
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                    <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-900">Need help?</h3>
+                        <button
+                            onClick={() => setShowHelpModal(false)}
+                            className="p-1 rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="p-6">
+                        <h4 className="text-base font-medium text-gray-900 mb-4">Send us a message</h4>
+                        <div className="mb-4">
+                            <label className="block text-sm text-gray-600 mb-2">
+                                What kind of problem are you having? *
+                            </label>
+                            <div className="relative">
+                                <select
+                                    value={selectedProblem}
+                                    onChange={(e) => setSelectedProblem(e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                                >
+                                    {problemOptions.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
+                        </div>
+                        <div className="mb-6">
+                            <label className="block text-sm text-gray-600 mb-2">
+                                Explain your problem:
+                            </label>
+                            <textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder=""
+                                className="w-full h-24 p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                        <button
+                            onClick={handleSubmit}
+                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="bg-gray-50 h-full flex flex-col">
+        <div className="bg-gray-50 h-full flex flex-col relative">
+            {/* Ask a question button - positioned in top right */}
+            <div className="absolute top-6 right-6 z-20">
+                <button
+                    onClick={() => setShowHelpModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-lg"
+                >
+                    Ask a question
+                </button>
+            </div>
+            
             <div className="flex-1 p-8 grid grid-cols-2 gap-8 overflow-y-auto">
                 <div className="bg-white border rounded-lg flex items-center justify-center overflow-hidden">
                     <UtilityBillPlaceholder />
@@ -976,6 +1398,9 @@ export const ValidationScreen = ({ onValidationComplete }) => {
                     Finish Upload
                 </button>
             </div>
+            
+            {/* Help Modal */}
+            {showHelpModal && <HelpModal />}
         </div>
     );
 };

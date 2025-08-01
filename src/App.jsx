@@ -135,7 +135,7 @@ export default function App() {
                     {/* Main View Headers */}
                     {view === 'taskList' && (
                         <div className="px-6 flex items-center">
-                            <h1 className="text-xl font-semibold text-gray-900">2022 measurement</h1>
+                            <h1 className="text-xl font-semibold text-gray-900">2025 measurement</h1>
                         </div>
                     )}
                     {view === 'footprint' && (
