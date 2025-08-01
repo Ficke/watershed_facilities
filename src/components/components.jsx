@@ -75,18 +75,45 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
 
     const TaskItem = ({ task, onUploadClick }) => {
         const isInteractive = task.isInteractive;
-        const itemClasses = `flex items-center space-x-4 py-3 px-4 hover:bg-gray-50 ${isInteractive ? 'cursor-pointer' : ''}`;
+        const itemClasses = `flex items-center py-3 px-4 hover:bg-gray-50 ${isInteractive ? 'cursor-pointer' : ''}`;
 
         return (
-            <div className={itemClasses} onClick={isInteractive ? onUploadClick : undefined}>
-                <StatusIcon status={task.status} />
-                <span className="flex-grow text-sm text-gray-900">
+            <div className={itemClasses} onClick={isInteractive && !task.hasStartButton ? onUploadClick : undefined}>
+                {/* Status Icon */}
+                <div className="w-6 flex justify-center mr-4">
+                    <StatusIcon status={task.status} />
+                </div>
+                
+                {/* Task Description */}
+                <div className="flex-1 text-sm text-gray-900 mr-4">
                     {task.issue && <span className="text-red-600 mr-2">!</span>}
                     {task.description}
-                </span>
-                <div className="flex items-center space-x-3 flex-shrink-0">
-                    {task.statusBadge && <StatusBadge status={task.statusBadge} />}
+                </div>
+                
+                {/* Assignee (Center) */}
+                <div className="flex-1 flex justify-center mr-4">
                     <AssigneePill name={task.assignee} />
+                </div>
+                
+                {/* Action Button or Status (Right) */}
+                <div className="flex-shrink-0 w-24 flex justify-end">
+                    {task.hasStartButton ? (
+                        <button 
+                            onClick={onUploadClick}
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                        >
+                            Start →
+                        </button>
+                    ) : task.hasRespondButton ? (
+                        <button 
+                            onClick={() => console.log('Respond clicked')}
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                        >
+                            Respond →
+                        </button>
+                    ) : (
+                        <span className="text-sm text-gray-500">-</span>
+                    )}
                 </div>
             </div>
         );
@@ -118,72 +145,105 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
     const TimelineView = () => {
         return (
             <div className="bg-white h-full">
-                <div className="p-6 max-w-4xl">
+                <div className="p-6 max-w-6xl">
                     {/* Goal Banner */}
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm text-green-700">
+                    <div className="flex items-center mb-8 rounded-lg overflow-hidden border border-gray-200">
+                        {/* Left section - Goal text on gray background */}
+                        <div className="bg-gray-100 px-4 py-3 flex-1">
+                            <div className="text-sm text-gray-700 font-medium">
                                 Your goal is to understand the biggest emitters in your footprint
                             </div>
-                            <button className="text-green-700 text-sm font-medium hover:text-green-800">
-                                See focus →
+                        </div>
+                        
+                        {/* Right section - Status on green background */}
+                        <div className="bg-green-100 px-4 py-3 flex items-center space-x-3">
+                            <div className="text-sm text-green-800">
+                                You're on track to meet your Apr 24 target.
+                            </div>
+                            <button 
+                                onClick={() => setActiveView('tasks')}
+                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                            >
+                                See tasks →
                             </button>
                         </div>
                     </div>
 
-                    {/* Timeline with dates */}
+                    {/* Gantt Chart Timeline */}
                     <div className="relative">
-                        {/* Timeline header with months */}
-                        <div className="flex justify-between text-sm text-gray-500 mb-4 px-4">
-                            <span>Mar</span>
-                            <span>Apr</span>
-                            <span>May</span>
-                        </div>
-                        
-                        {/* Timeline bar with target marker */}
-                        <div className="relative mb-8">
-                            <div className="h-2 bg-gray-200 rounded-full">
-                                <div className="h-2 bg-blue-500 rounded-full" style={{width: '60%'}}></div>
-                            </div>
-                            {/* Target marker */}
-                            <div className="absolute right-0 top-0 transform translate-x-1/2">
-                                <div className="w-4 h-4 bg-white border-2 border-blue-500 rounded-full"></div>
-                                <div className="absolute -top-6 -left-8 text-xs text-gray-600">Target</div>
-                            </div>
+                        {/* Month Headers */}
+                        <div className="grid grid-cols-12 gap-0 mb-2 text-xs text-gray-500 font-medium">
+                            <div className="col-span-3"></div> {/* Space for task names */}
+                            <div className="col-span-3 text-center border-l border-gray-200 py-2">Mar</div>
+                            <div className="col-span-3 text-center border-l border-gray-200 py-2">Apr</div>
+                            <div className="col-span-3 text-center border-l border-gray-200 py-2">May</div>
                         </div>
 
-                        {/* Timeline steps */}
-                        <div className="space-y-6">
-                            {/* Data collection - Active */}
-                            <div className="flex items-start space-x-4">
-                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                        {/* Today marker line */}
+                        <div className="absolute left-1/2 top-8 bottom-0 w-px bg-red-400 z-10">
+                            <div className="absolute -top-6 -left-4 text-xs text-red-600 font-medium">Today</div>
+                        </div>
+
+                        {/* Target marker */}
+                        <div className="absolute right-8 top-8 bottom-0 w-px bg-blue-400 z-10">
+                            <div className="absolute -top-6 -left-6 text-xs text-blue-600 font-medium">Target</div>
+                        </div>
+
+                        {/* Timeline Grid */}
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                            {/* Data Collection Row */}
+                            <div className="grid grid-cols-12 gap-0 border-b border-gray-200">
+                                <div className="col-span-3 p-4 bg-gray-50 border-r border-gray-200">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                        <span className="text-sm font-medium text-gray-900">Data collection</span>
+                                    </div>
+                                    <div className="text-xs text-gray-600 mt-1">On track</div>
                                 </div>
-                                <div className="flex-1">
-                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                        <h3 className="font-medium text-gray-900 mb-1">Data collection</h3>
-                                        <p className="text-sm text-gray-600 mb-2">On track</p>
-                                        
-                                        {/* Sub-step */}
-                                        <div className="ml-4 mt-3">
-                                            <div className="bg-blue-100 border border-blue-200 rounded-lg p-3">
-                                                <h4 className="font-medium text-gray-900 mb-1">Data review & processing</h4>
-                                                <p className="text-sm text-gray-600">Watershed is processing your data</p>
-                                            </div>
+                                <div className="col-span-9 relative p-2">
+                                    {/* Data collection bar - spans from start to middle */}
+                                    <div className="absolute left-2 top-1/2 transform -translate-y-1/2 h-6 bg-blue-500 rounded" style={{width: '45%'}}>
+                                        <div className="h-full flex items-center justify-center text-xs text-white font-medium">
+                                            Data collection
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Footprint review - Not started */}
-                            <div className="flex items-start space-x-4">
-                                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                            {/* Data Review & Processing Row */}
+                            <div className="grid grid-cols-12 gap-0 border-b border-gray-200">
+                                <div className="col-span-3 p-4 bg-gray-50 border-r border-gray-200">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                        <span className="text-sm font-medium text-gray-900">Data review & processing</span>
+                                    </div>
+                                    <div className="text-xs text-gray-600 mt-1">Watershed is processing your data</div>
                                 </div>
-                                <div className="flex-1">
-                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                        <h3 className="font-medium text-gray-900 mb-1">Footprint review</h3>
-                                        <p className="text-sm text-gray-600">Not started</p>
+                                <div className="col-span-9 relative p-2">
+                                    {/* Processing bar - spans middle section */}
+                                    <div className="absolute left-1/3 top-1/2 transform -translate-y-1/2 h-6 bg-blue-400 rounded" style={{width: '35%'}}>
+                                        <div className="h-full flex items-center justify-center text-xs text-white font-medium">
+                                            Processing
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footprint Review Row */}
+                            <div className="grid grid-cols-12 gap-0">
+                                <div className="col-span-3 p-4 bg-gray-50 border-r border-gray-200">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                                        <span className="text-sm font-medium text-gray-900">Footprint review</span>
+                                    </div>
+                                    <div className="text-xs text-gray-600 mt-1">Not started</div>
+                                </div>
+                                <div className="col-span-9 relative p-2">
+                                    {/* Footprint review bar - future section */}
+                                    <div className="absolute right-8 top-1/2 transform -translate-y-1/2 h-6 bg-gray-300 rounded" style={{width: '25%'}}>
+                                        <div className="h-full flex items-center justify-center text-xs text-gray-600 font-medium">
+                                            Review
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -467,7 +527,14 @@ export const Sidebar = ({ view, setView, showFooter = true, showHeader = true })
                         <div key={item.name}>
                             <button onClick={() => {
                                 if (item.view && !item.subItems) setView(item.view);
-                                if (item.subItems) setExpanded(item.name === expanded ? null : item.name);
+                                if (item.subItems) {
+                                    setExpanded(item.name === expanded ? null : item.name);
+                                    // Navigate to first sub-item if it has a view
+                                    const firstSubItem = item.subItems.find(sub => sub.view);
+                                    if (firstSubItem) {
+                                        setView(firstSubItem.view);
+                                    }
+                                }
                             }} className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
                                 (item.view === view || isParentActive) ? 'bg-gray-700' : 'hover:bg-gray-700'
                             } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400`}>
@@ -479,7 +546,7 @@ export const Sidebar = ({ view, setView, showFooter = true, showHeader = true })
                                     {item.subItems.map(subItem => (
                                         <button key={subItem.name || subItem} onClick={() => subItem.view && setView(subItem.view)}
                                          className={`w-full text-left block px-3 py-1.5 rounded-md text-sm transition-colors duration-150 ${
-                                             subItem.view === view ? 'text-white' : 'text-gray-300'
+                                             subItem.view === view ? 'bg-gray-700 text-white' : 'text-gray-300'
                                          } hover:bg-gray-700 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400`}>
                                             {subItem.name || subItem}
                                         </button>

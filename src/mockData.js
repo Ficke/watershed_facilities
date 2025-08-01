@@ -13,10 +13,10 @@ export const initialDatasets = [
     { name: 'Cloud usage', tasks: [], statusBadge: 'Needs response' },
     { name: 'Cost of revenue', tasks: [], statusBadge: 'Needs response' },
     { name: 'Flights', tasks: [
-        { id: 1, status: 'To do', description: 'Upload Flights', assignee: 'Unassigned', statusBadge: 'Needs response' },
-        { id: 2, status: 'To do', description: 'Upload Flights: TripActions', assignee: 'Madeline Pickering', statusBadge: 'Needs response' },
-        { id: 3, status: 'Blocked', description: 'Process Flights', assignee: 'Watershed expert', statusBadge: 'Needs response' },
-        { id: 4, status: 'To do', description: 'There is an issue here', assignee: 'Madeline Pickering', issue: true, statusBadge: 'Needs response' },
+        { id: 1, status: 'To do', description: 'Upload Flights', assignee: 'Unassigned', hasStartButton: true },
+        { id: 2, status: 'To do', description: 'Upload Flights: TripActions', assignee: 'Madeline Pickering', hasRespondButton: true },
+        { id: 3, status: 'Blocked', description: 'Process Flights', assignee: 'Watershed expert' },
+        { id: 4, status: 'To do', description: 'There is an issue here', assignee: 'Madeline Pickering', issue: true, hasRespondButton: true },
     ], statusBadge: 'Needs response'},
     { name: 'Hotels', tasks: [], statusBadge: 'Needs response' },
     { name: 'Card production', tasks: [], statusBadge: 'Needs upload' },
@@ -26,7 +26,7 @@ export const initialDatasets = [
     {
         name: 'Utilities',
         tasks: [
-            { id: 5, status: 'To do', description: 'Upload Utilities', assignee: 'Jane', isInteractive: true, statusBadge: 'Needs upload' }
+            { id: 5, status: 'To do', description: 'Upload Utilities', assignee: 'Jane', isInteractive: true, hasStartButton: true }
         ],
         statusBadge: 'Needs upload'
     },
