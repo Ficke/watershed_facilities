@@ -498,10 +498,9 @@ export const ActiveMeasurementScreen = ({ datasets, onUploadClick }) => {
     );
 }
 
-export const UploadScreen = ({ onFilesUploaded }) => {
+export const UploadScreen = ({ onFilesUploaded, showHelpModal, setShowHelpModal }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [showHelpModal, setShowHelpModal] = useState(false);
     const fileInputRef = useRef(null);
 
     const handleFileSelect = (files) => {
@@ -610,15 +609,6 @@ export const UploadScreen = ({ onFilesUploaded }) => {
 
     return (
         <div className="bg-white h-full flex flex-col relative">
-            {/* Ask a question button - positioned in top right */}
-            <div className="absolute top-6 right-6 z-10">
-                <button
-                    onClick={() => setShowHelpModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-lg"
-                >
-                    Ask a question
-                </button>
-            </div>
             
             <div className="flex-1 p-8 flex flex-col items-center justify-center" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
                 {isProcessing ? (
@@ -650,8 +640,7 @@ export const UploadScreen = ({ onFilesUploaded }) => {
     );
 };
 
-export const UploadResultsScreen = ({ uploadedFiles }) => {
-    const [showHelpModal, setShowHelpModal] = useState(false);
+export const UploadResultsScreen = ({ uploadedFiles, showHelpModal, setShowHelpModal }) => {
     const successfulFiles = uploadedFiles.filter(f => !f.needsReview);
     const reviewFiles = uploadedFiles.filter(f => f.needsReview);
     
@@ -728,16 +717,7 @@ export const UploadResultsScreen = ({ uploadedFiles }) => {
     };
 
     return (
-        <div className="bg-white h-full flex flex-col relative">            
-            {/* Ask a question button - positioned in top right */}
-            <div className="absolute top-6 right-6 z-10">
-                <button
-                    onClick={() => setShowHelpModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-lg"
-                >
-                    Ask a question
-                </button>
-            </div>
+        <div className="bg-white h-full flex flex-col relative">
             
             <div className="flex-1 p-8">
                 <div className="max-w-4xl mx-auto h-full flex flex-col">
@@ -1220,12 +1200,11 @@ export const Calendar = ({ selectedDate, onDateSelect }) => {
 };
 
 
-export const ValidationScreen = ({ onValidationComplete }) => {
+export const ValidationScreen = ({ onValidationComplete, showHelpModal, setShowHelpModal }) => {
     const [step, setStep] = useState(0);
     const [kwhValue, setKwhValue] = useState("15,220");
     const [dateValue, setDateValue] = useState("2025/07/31");
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [showHelpModal, setShowHelpModal] = useState(false);
 
     const billsToReview = [
         {
@@ -1252,7 +1231,7 @@ export const ValidationScreen = ({ onValidationComplete }) => {
     };
 
     const HelpModal = () => {
-        const [selectedProblem, setSelectedProblem] = useState('I don\'t know what data is required');
+        const [selectedProblem, setSelectedProblem] = useState('The extracted data looks incorrect');
         const [message, setMessage] = useState('');
 
         const problemOptions = [
@@ -1326,15 +1305,6 @@ export const ValidationScreen = ({ onValidationComplete }) => {
 
     return (
         <div className="bg-gray-50 h-full flex flex-col relative">
-            {/* Ask a question button - positioned in top right */}
-            <div className="absolute top-6 right-6 z-20">
-                <button
-                    onClick={() => setShowHelpModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-lg"
-                >
-                    Ask a question
-                </button>
-            </div>
             
             <div className="flex-1 p-8 grid grid-cols-2 gap-8 overflow-y-auto">
                 <div className="bg-white border rounded-lg flex items-center justify-center overflow-hidden">
