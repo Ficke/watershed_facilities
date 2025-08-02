@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, ArrowLeft } from 'lucide-react';
+import { Settings, ArrowLeft, HelpCircle } from 'lucide-react';
 // Corrected imports to point to the single components.jsx file
 import { 
     Sidebar,
@@ -19,6 +19,9 @@ export default function App() {
     const [uploadedFileCount, setUploadedFileCount] = useState(0);
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [needsValidation, setNeedsValidation] = useState(false);
+    const [showValidationHelp, setShowValidationHelp] = useState(false);
+    const [showUploadResultsHelp, setShowUploadResultsHelp] = useState(false);
+    const [showUploadHelp, setShowUploadHelp] = useState(false);
 
     const handleUploadClick = () => setView('uploadScreen');
 
@@ -74,14 +77,16 @@ export default function App() {
     const renderView = () => {
         switch (view) {
             case 'uploadScreen':
-                return <UploadScreen onFilesUploaded={handleFilesUploaded} />;
+                return <UploadScreen onFilesUploaded={handleFilesUploaded} showHelpModal={showUploadHelp} setShowHelpModal={setShowUploadHelp} />;
             case 'uploadResults':
                 return <UploadResultsScreen 
                     uploadedFiles={uploadedFiles} 
                     onContinue={handleUploadResultsContinue}
+                    showHelpModal={showUploadResultsHelp}
+                    setShowHelpModal={setShowUploadResultsHelp}
                 />;
             case 'validationScreen':
-                return <ValidationScreen onValidationComplete={handleValidationComplete} />;
+                return <ValidationScreen onValidationComplete={handleValidationComplete} showHelpModal={showValidationHelp} setShowHelpModal={setShowValidationHelp} />;
             case 'footprint':
                 return <FootprintScreen />;
             case 'taskList':
@@ -105,30 +110,45 @@ export default function App() {
                 <div className="flex-1 bg-white flex items-center">
                     {/* Upload Flow Headers */}
                     {view === 'uploadScreen' && (
-                        <div className="px-6 flex items-center">
-                            <button onClick={() => setView('taskList')} className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
-                                <ArrowLeft className="w-5 h-5" />
+                        <div className="w-full px-6 flex items-center justify-between">
+                            <div className="flex items-center">
+                                <button onClick={() => setView('taskList')} className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                                <h1 className="text-xl font-semibold text-gray-900 ml-4">Upload Utilities</h1>
+                            </div>
+                            <button onClick={() => setShowUploadHelp(true)} className="p-2 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+                                <HelpCircle className="w-5 h-5" />
                             </button>
-                            <h1 className="text-xl font-semibold text-gray-900 ml-4">Upload Utilities</h1>
                         </div>
                     )}
                     {view === 'uploadResults' && (
-                        <div className="px-6 flex items-center">
-                            <button onClick={() => setView('uploadScreen')} className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
-                                <ArrowLeft className="w-5 h-5" />
+                        <div className="w-full px-6 flex items-center justify-between">
+                            <div className="flex items-center">
+                                <button onClick={() => setView('uploadScreen')} className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                                <h1 className="text-xl font-semibold text-gray-900 ml-4">Upload Results</h1>
+                            </div>
+                            <button onClick={() => setShowUploadResultsHelp(true)} className="p-2 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+                                <HelpCircle className="w-5 h-5" />
                             </button>
-                            <h1 className="text-xl font-semibold text-gray-900 ml-4">Upload Results</h1>
                         </div>
                     )}
                     {view === 'validationScreen' && (
-                        <div className="px-6 flex items-center">
-                            <button onClick={() => setView('uploadResults')} className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 mr-4">
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                            <div className="flex flex-col justify-center">
-                                <h1 className="text-xl font-semibold text-gray-900">Review {uploadedFiles.filter(f => f.needsReview).length} bills</h1>
-                                <p className="text-sm text-gray-600 mt-1">Our system needs your help to confirm a few values.</p>
+                        <div className="w-full px-6 flex items-center justify-between">
+                            <div className="flex items-center">
+                                <button onClick={() => setView('uploadResults')} className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 mr-4">
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                                <div className="flex flex-col justify-center">
+                                    <h1 className="text-xl font-semibold text-gray-900">Review {uploadedFiles.filter(f => f.needsReview).length} bills</h1>
+                                    <p className="text-sm text-gray-600 mt-1">Our system needs your help to confirm a few values.</p>
+                                </div>
                             </div>
+                            <button onClick={() => setShowValidationHelp(true)} className="p-2 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+                                <HelpCircle className="w-5 h-5" />
+                            </button>
                         </div>
                     )}
                     
